@@ -1,0 +1,134 @@
+﻿@page "/edit"
+@page "/edit/{id:int}"
+@using OrderSalesApp.Shared.Entities
+@inject IOrderService OrderService
+@rendermode RenderMode.InteractiveAuto
+@inject NavigationManager NavigationManager
+
+@if(Id == null)
+{
+    <PageTitle>Order Creation</PageTitle>
+    <h1>Add Order</h1>
+}
+else
+{
+    <PageTitle>Edit your Order</PageTitle>
+    <h1>Edit @order.OrderName</h1>
+}
+
+<div class="container mt-5">
+    <EditForm Model="order" OnSubmit="HandleSubmit">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Order Name:</label>
+                <InputText class="form-control" @bind-Value="order.OrderName" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">State:</label>
+                <InputText class="form-control" @bind-Value="order.State" required />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Window Name:</label>
+                <select class="form-select" @bind="order.WindowName" required>
+                    <option value="">-- Select --</option>
+                    <option value="A51">A51</option>
+                    <option value="C Zone 5">C Zone 5</option>
+                    <option value="GLB">GLB</option>
+                    <option value="OHF">OHF</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Select Type:</label>
+                <select class="form-select" @bind="order.Type" required>
+                    <option value="">-- Select --</option>
+                    <option value="Door">Door</option>
+                    <option value="Window">Window</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Height:</label>
+                <InputNumber class="form-control" @bind-Value="order.Height" min="100" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Width:</label>
+                <InputNumber class="form-control" @bind-Value="order.Width" min="1" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Quantity of Windows:</label>
+                <InputNumber class="form-control" @bind-Value="order.Qty" min="1" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Note:</label>
+                <textarea class="form-control" @bind="order.ProductName" />
+            </div>
+        </div>
+        <div class="mb-3">
+            @if (Id != null)
+            {
+                <button type="submit" class="btn btn-primary me-2">Save</button>
+                <button @onclick="DeleteOrder" type="button" class="btn btn-danger">Delete</button>
+                <button @onclick="CancelOrder" type="button" class="btn btn-outline-secondary">Cancel</button>
+            } 
+            else
+            {
+                <button type="submit" class="btn btn-primary me-2">Submit</button>
+                <button @onclick="CancelOrder" type="button" class="btn btn-outline-secondary">Cancel</button>
+            }
+
+        </div>
+    </EditForm>
+</div>
+
+
+    @code {
+
+    [Parameter]
+    public int? Id { get; set; }
+    Order order { get; set; } = new Order { OrderName = string.Empty, State = string.Empty, WindowName = string.Empty, Qty = 0, TotalProducts = 0, Height = 0, Width = 0, Type = string.Empty, ProductName = string.Empty};
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id.HasValue)
+        {
+            order = await OrderService.GetOrderById(Id.Value);
+        }
+        else
+        {
+            // Handle the case when Id is null (e.g., set order to a default value)
+            order = new Order { OrderName = "", State = "", WindowName = "", Qty = 1, TotalProducts = 1, Height = 100, Width = 100, Type = "", ProductName = ""};
+        }
+    }
+
+    async Task HandleSubmit()
+    {
+        if(Id == null)
+        {
+            await OrderService.AddOrder(order);
+        }
+        else
+        {
+            await OrderService.EditOrder((int)Id, order);
+        }
+        NavigationManager.NavigateTo("/orders");
+    }
+
+    async Task DeleteOrder()
+    {
+        await OrderService.DeleteOrder((int)Id);
+        NavigationManager.NavigateTo("/orders");
+    }
+
+     async Task CancelOrder()
+    {
+        NavigationManager.NavigateTo("/orders");
+    }
+}

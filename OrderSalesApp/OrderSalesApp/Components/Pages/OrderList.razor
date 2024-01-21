@@ -1,0 +1,66 @@
+﻿@page "/orders"
+@inject IOrderService OrderService
+
+<PageTitle>Orders</PageTitle>
+@if (orders == null)
+{
+    <span>Loading...</span>
+}
+else if (orders.Count == 0)
+{
+    <span>No Orders found.</span>
+}
+else
+{
+    <div class="container mt-4">
+        <h1 class="mb-4">Order List</h1>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order Name</th>
+                        <th>State</th>
+                        <th>Window Name</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in orders)
+                    {
+                        <tr>
+                            <td>@order.OrderName</td>
+                            <td>@order.State</td>
+                            <td>@order.WindowName</td>
+                            <td>@order.Type</td>
+                            <td>@order.Qty</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <EditOrderButton Id="@order.Id" />
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <ViewOrderButton Id="@order.Id" />
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+}
+
+<AddOrderButton/>
+
+@code {
+    List<Order>? orders = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrders();
+    }
+}

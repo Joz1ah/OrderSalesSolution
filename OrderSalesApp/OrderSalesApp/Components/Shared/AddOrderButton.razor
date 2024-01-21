@@ -1,0 +1,11 @@
+﻿@inject NavigationManager NavigationManager
+@rendermode RenderMode.InteractiveServer
+
+<button @onclick="AddOrder" class="btn btn-primary">Create Order</button>
+
+@code {
+    void AddOrder()
+    {
+        NavigationManager.NavigateTo("/edit");
+    }
+}

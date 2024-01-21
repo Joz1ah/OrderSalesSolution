@@ -1,0 +1,100 @@
+﻿@page "/view"
+@page "/view/{id:int}"
+@using OrderSalesApp.Shared.Entities
+@inject IOrderService OrderService
+@rendermode RenderMode.InteractiveAuto
+@inject NavigationManager NavigationManager
+
+<PageTitle>Your Order</PageTitle>
+<h1>View @order.OrderName</h1>
+
+<div class="container mt-5">
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Order Name:</label>
+            <div class="form-control">@order.OrderName</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">State:</label>
+            <div class="form-control">@order.State</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Window Name:</label>
+            <div class="form-control">@order.WindowName</div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Select Type:</label>
+            <div class="form-control">@order.Type</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Height:</label>
+            <div class="form-control">@order.Height</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Width:</label>
+            <div class="form-control">@order.Width</div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Quantity of Windows:</label>
+            <div class="form-control">@order.Qty</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Note:</label>
+            <textarea class="form-control" @bind="order.ProductName" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        @if (Id != null)
+        {
+            <button @onclick="EditOrder" type="button" class="btn btn-primary me-2">Edit</button>
+            <button @onclick="DeleteOrder" type="button" class="btn btn-danger">Delete</button>
+            <button @onclick="BackOrder" type="button" class="btn btn-outline-secondary">Back</button>
+        }
+    </div>
+</div>
+
+
+
+    @code {
+
+    [Parameter]
+    public int? Id { get; set; }
+    Order order { get; set; } = new Order { OrderName = string.Empty, State = string.Empty, WindowName = string.Empty, Qty = 0, TotalProducts = 0, Height = 0, Width = 0, Type = string.Empty, ProductName = string.Empty};
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id.HasValue)
+        {
+            order = await OrderService.GetOrderById(Id.Value);
+        }
+        else
+        {
+            // Handle the case when Id is null (e.g., set order to a default value)
+            order = new Order { OrderName = "", State = "", WindowName = "", Qty = 1, TotalProducts = 1, Height = 100, Width = 100, Type = "", ProductName = ""};
+        }
+    }
+
+    async Task EditOrder()
+    {
+        NavigationManager.NavigateTo($"/edit/{Id}");
+    }
+
+    async Task DeleteOrder()
+    {
+        await OrderService.DeleteOrder((int)Id);
+        NavigationManager.NavigateTo("/orders");
+    }
+
+    async Task BackOrder()
+    {
+        NavigationManager.NavigateTo("/orders");
+    }
+}
